@@ -10,7 +10,6 @@ using Terraria;
 using TerrariaApi.Server;
 using TShockAPI;
 using TShockAPI.Hooks;
-using static CNPCShop.CNSConfig;
 
 namespace CNPCShop
 {
@@ -22,7 +21,7 @@ namespace CNPCShop
         public override Version Version => Assembly.GetExecutingAssembly().GetName().Version;
         public override string Description => "自定义NPC商店出售的物品";
         public CNSPlugin(Main game) : base(game) { }
-        public static List<Shop> AvilavleShops { get; set; } = new List<Shop>();
+        public static List<CNSConfig.Shop> AviliableShops { get; set; } = new List<CNSConfig.Shop>();
         public static CNSConfig Config { get; set; } = new CNSConfig();
         public override void Initialize()
         {
@@ -37,7 +36,7 @@ namespace CNPCShop
                 ServerApi.Hooks.GamePostInitialize.Deregister(this, OnPostInitialize);
                 ServerApi.Hooks.NetGetData.Deregister(this, OnGetData);
                 GeneralHooks.ReloadEvent -= OnReload;
-                AvilavleShops.Clear();
+                AviliableShops.Clear();
             }
             base.Dispose(disposing);
         }
@@ -56,16 +55,15 @@ namespace CNPCShop
             var index = args.Msg.readBuffer[args.Index];
             var npcID = (short)(args.Msg.readBuffer[args.Index + 1]
                              + (args.Msg.readBuffer[args.Index + 2] << 8));
-            if (index != args.Msg.whoAmI)
+            if (index != args.Msg.whoAmI || npcID != -1)
                 return;
-            if(npcID != -1) OnShopOpen(TShock.Players[index], npcID);
+            OnShopOpen(TShock.Players[index], npcID);
         }
         void OnShopOpen(TSPlayer plr, int npcID)
         {
-            int npcType = Main.npc[npcID].type;
-            if ((plr != null) && npcID != -1 && (npcID != plr.TPlayer.talkNPC))
+            if (plr != null && npcID != -1 && npcID != plr.TPlayer.talkNPC)
             {
-                var list = AvilavleShops.Where(s => s.NPC == npcType && (s.Groups.Contains(plr.Group.Name) || !s.Groups.Any())).ToList();
+                var list = AviliableShops.Where(s => s.NPC == Main.npc[npcID].type && (s.Groups.Contains(plr.Group.Name) || !s.Groups.Any())).ToList();
                 if (list.FirstOrDefault() is { } shop)
                 {
                     Task.Run(() => {

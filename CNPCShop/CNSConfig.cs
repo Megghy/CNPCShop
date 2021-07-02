@@ -16,7 +16,7 @@ namespace CNPCShop
         public ShopContainer[] Shops = new ShopContainer[0];
         public static void Load()
         {
-            CNSPlugin.AvilavleShops.Clear();
+            CNSPlugin.AviliableShops.Clear();
             var path = Path.Combine(TShock.SavePath, "CNPCShop.json");
             if (!File.Exists(path))
             {
@@ -157,7 +157,7 @@ namespace CNPCShop
                     }
                     for (byte i = count; i < 40; i++)
                         shop.RawData[i] = new byte[] { 14, 0, 104, i, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-                    CNSPlugin.AvilavleShops.Add(shop);
+                    CNSPlugin.AviliableShops.Add(shop);
                 }
             }
         }
