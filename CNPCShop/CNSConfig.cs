@@ -12,8 +12,10 @@ namespace CNPCShop
 {
     public class CNSConfig
     {
+        [JsonProperty("更新间隔")]
+        public int UpdateTime = 500;
         [JsonProperty("总列表")]
-        public ShopContainer[] Shops = new ShopContainer[0];
+        public List<ShopContainer> Shops = new List<ShopContainer>();
         public static void Load()
         {
             CNSPlugin.AviliableShops.Clear();
@@ -22,7 +24,7 @@ namespace CNPCShop
             {
                 CNSPlugin.Config = new CNSConfig()
                 {
-                    Shops = new ShopContainer[]
+                    Shops = new List<ShopContainer>()
                     {
                         new ShopContainer()
                         {

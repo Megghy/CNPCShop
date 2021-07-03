@@ -21,8 +21,8 @@ namespace CNPCShop
         public override Version Version => Assembly.GetExecutingAssembly().GetName().Version;
         public override string Description => "自定义NPC商店出售的物品";
         public CNSPlugin(Main game) : base(game) { }
-        public static List<CNSConfig.Shop> AviliableShops { get; set; } = new List<CNSConfig.Shop>();
-        public static CNSConfig Config { get; set; } = new CNSConfig();
+        public static List<CNSConfig.Shop> AviliableShops { get; internal set; } = new List<CNSConfig.Shop>();
+        public static CNSConfig Config { get; internal set; } = new CNSConfig();
         public override void Initialize()
         {
             ServerApi.Hooks.GamePostInitialize.Register(this, OnPostInitialize);
@@ -41,7 +41,7 @@ namespace CNPCShop
             base.Dispose(disposing);
         }
         private void OnPostInitialize(EventArgs args) =>
-            OnReload(null);
+            CNSConfig.Load();
         private void OnReload(ReloadEventArgs args)
         {
             CNSConfig.Load();
@@ -55,7 +55,7 @@ namespace CNPCShop
             var index = args.Msg.readBuffer[args.Index];
             var npcID = (short)(args.Msg.readBuffer[args.Index + 1]
                              + (args.Msg.readBuffer[args.Index + 2] << 8));
-            if (index != args.Msg.whoAmI || npcID != -1)
+            if (index != args.Msg.whoAmI || npcID == -1)
                 return;
             OnShopOpen(TShock.Players[index], npcID);
         }
@@ -63,15 +63,14 @@ namespace CNPCShop
         {
             if (plr != null && npcID != -1 && npcID != plr.TPlayer.talkNPC)
             {
-                var list = AviliableShops.Where(s => s.NPC == Main.npc[npcID].type && (s.Groups.Contains(plr.Group.Name) || !s.Groups.Any())).ToList();
-                if (list.FirstOrDefault() is { } shop)
+                if (AviliableShops.FirstOrDefault(s => s.NPC == Main.npc[npcID].type && (s.Groups.Contains(plr.Group.Name) || !s.Groups.Any())) is { } shop)
                 {
                     Task.Run(() => {
                         if(shop.OpenMessage.Any()) plr.SendMessage(shop.OpenMessage[new Random().Next(shop.OpenMessage.Count)].Replace("{name}", plr.Name), Color.White);
                         while (plr.TPlayer.talkNPC == npcID)
                         {
                             shop.RawData.ForEach(r => plr.SendRawData(r));
-                            Task.Delay(100).Wait();
+                            Task.Delay(Config.UpdateTime).Wait();
                         }
                         if (shop.CloseMessage.Any()) plr.SendMessage(shop.CloseMessage[new Random().Next(shop.CloseMessage.Count)].Replace("{name}", plr.Name), Color.White);
                     });
