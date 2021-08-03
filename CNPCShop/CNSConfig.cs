@@ -44,6 +44,7 @@ namespace CNPCShop
                                         new CNSItem()
                                         {
                                             NetID = ItemID.Torch,
+                                            Stack = 100,
                                             Prefix = 0,
                                             Price = new Price()
                                             {
@@ -57,6 +58,7 @@ namespace CNPCShop
                                         {
                                             NetID = ItemID.LesserHealingPotion,
                                             Prefix = 0,
+                                            Stack = 10,
                                             Price = new Price()
                                             {
                                                 Copper = 99,
@@ -68,6 +70,7 @@ namespace CNPCShop
                                         new CNSItem()
                                         {
                                             NetID = ItemID.IronskinPotion,
+                                            Stack = 10,
                                             Prefix = 0,
                                             Price = new Price()
                                             {
@@ -80,6 +83,7 @@ namespace CNPCShop
                                         new CNSItem()
                                         {
                                             NetID = ItemID.RecallPotion,
+                                            Stack = 10,
                                             Prefix = 0,
                                             Price = new Price()
                                             {
@@ -103,6 +107,7 @@ namespace CNPCShop
                                         new CNSItem()
                                         {
                                             NetID = ItemID.IronPickaxe,
+                                            Stack = 1,
                                             Prefix = 0,
                                             Price = new Price()
                                             {
@@ -115,6 +120,7 @@ namespace CNPCShop
                                         new CNSItem()
                                         {
                                             NetID = ItemID.DirtBlock,
+                                            Stack = 999,
                                             Prefix = 0,
                                             Price = new Price()
                                             {
@@ -149,11 +155,12 @@ namespace CNPCShop
                             break;
                         var item = shop.Items[i];
                         byte[] idBytes = BitConverter.GetBytes(item.NetID);
+                        byte[] stackBytes = BitConverter.GetBytes(item.Stack);
                         byte[] priceBytes = BitConverter.GetBytes(Item.buyPrice(item.Price.Platinum,
                             item.Price.Gold, item.Price.Silver, item.Price.Copper));
                         shop.RawData[i] = new byte[]
                         {
-                            14, 0, 104, i, idBytes[0], idBytes[1], 1, 0, shop.Items[i].Prefix,
+                            14, 0, 104, i, idBytes[0], idBytes[1], stackBytes[0], stackBytes[1], shop.Items[i].Prefix,
                             priceBytes[0], priceBytes[1], priceBytes[2], priceBytes[3], 0
                         };
                     }
@@ -203,6 +210,8 @@ namespace CNPCShop
         {
             [JsonProperty("物品ID")]
             public short NetID;
+            [JsonProperty("堆叠")]
+            public int Stack;
             [JsonProperty("前缀")]
             public byte Prefix;
             [JsonProperty("价格")]
